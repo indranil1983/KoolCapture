@@ -33,6 +33,7 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import javax.imageio.ImageIO;
@@ -79,7 +80,7 @@ public class VideoRecorder {
                     	//Rectangle screen = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
                     	BufferedImage screenCaptureImage = capture.getSource();
 
-                    	Image cursor = ImageIO.read(new File("/home/echindr/git/screen-recorder/resources/images/cursor.png"));
+                    	Image cursor = ImageIO.read(new File("resources/images/cursor.png"));
                     	int x = MouseInfo.getPointerInfo().getLocation().x;
                     	int y = MouseInfo.getPointerInfo().getLocation().y;
 
@@ -109,12 +110,13 @@ public class VideoRecorder {
     /**
      * It stops the recording and creates the video.
      * @return a {@link String} with the path where the video was created or null if the video couldn't be created.
-     * @throws MalformedURLException
+     * @throws IOException 
      */
-    public static void stop() throws MalformedURLException 
+    public static void stop() throws IOException 
     {
         if (recording) 
         {
+        	ScreenCaptureClient.close();
         	recording = false;
         	if (currentThread.isAlive()) {
         		currentThread.interrupt();
@@ -132,6 +134,7 @@ public class VideoRecorder {
                 VideoRecorderConfiguration.getTempDirectory().mkdirs();
             }
             calculateScreenshotSize();
+            ScreenCaptureClient.init();
             recording = true;
             currentThread = getRecordThread();
             currentThread.start();

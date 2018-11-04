@@ -27,6 +27,7 @@
 package com.ericsson.broadcast;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
@@ -45,31 +46,37 @@ import com.ericsson.multimedia.capture.ScreenCapture;
  */
 public class ScreenCaptureClient {
 	
-	private static HttpPost httppost = new HttpPost("http://localhost:3000/upload");
+	private static HttpPost httppost = null;
+	private static CloseableHttpClient httpclient = null;
 
-    public static void postScreen(ScreenCapture sc, String id) throws Exception {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        try {
+	public static void init() {
+		httppost = new HttpPost("http://localhost:3000/upload");
+		httpclient = HttpClients.createDefault();
+	}
+	
+	public static void postScreen(ScreenCapture sc, String id) throws Exception {
 
-        	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        	ImageIO.write( sc.getSource(), "jpg", baos );
-        	baos.flush();
-        	byte[] imageInByte = baos.toByteArray();
-        	baos.close();
-        	HttpEntity reqEntity = MultipartEntityBuilder.create()
-        			.addBinaryBody("screenshot",imageInByte)
-        			.build();
-        	httppost.setEntity(reqEntity);
-        	CloseableHttpResponse response = httpclient.execute(httppost);
-        	try {
-        		HttpEntity resEntity = response.getEntity();
-        		EntityUtils.consume(resEntity);
-        	} finally {
-        		response.close();
-        	}
-        } finally {
-            httpclient.close();
-        }
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write( sc.getSource(), "jpg", baos );
+		baos.flush();
+		byte[] imageInByte = baos.toByteArray();
+		baos.close();
+		HttpEntity reqEntity = MultipartEntityBuilder.create()
+				.addBinaryBody("screenshot",imageInByte)
+				.build();
+		httppost.setEntity(reqEntity);
+		CloseableHttpResponse response = httpclient.execute(httppost);
+		try {
+			HttpEntity resEntity = response.getEntity();
+			EntityUtils.consume(resEntity);
+		} finally {
+			response.close();
+		}
+
+	}
+    
+    public static void close() throws IOException {
+    	httpclient.close();
     }
 
 }
