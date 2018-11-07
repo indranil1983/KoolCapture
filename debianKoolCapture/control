@@ -1,0 +1,5 @@
+Section: Application
+Priority: optional
+Architecture: all
+Maintainer: Indranil Chandra
+Description: Application to share screen

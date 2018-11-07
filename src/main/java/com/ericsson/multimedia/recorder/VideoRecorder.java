@@ -34,9 +34,13 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
+
+import org.apache.http.client.ClientProtocolException;
 
 import com.ericsson.broadcast.ScreenCaptureClient;
 import com.ericsson.multimedia.capture.ScreenCapture;
@@ -54,7 +58,19 @@ public class VideoRecorder {
      * Status of the recorder.
      */
     private static boolean recording = false;
-
+    static InputStream stream;
+    static Image cursor;
+    
+    static{
+    	stream= VideoRecorder.class.getResourceAsStream("/images/cursor.png");
+    	try {
+			cursor = ImageIO.read(stream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+	
     
         
     private static Thread currentThread;
@@ -79,8 +95,7 @@ public class VideoRecorder {
                     	
                     	//Rectangle screen = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
                     	BufferedImage screenCaptureImage = capture.getSource();
-
-                    	Image cursor = ImageIO.read(new File("resources/images/cursor.png"));
+                    
                     	int x = MouseInfo.getPointerInfo().getLocation().x;
                     	int y = MouseInfo.getPointerInfo().getLocation().y;
 
@@ -88,12 +103,13 @@ public class VideoRecorder {
                     	graphics2D.drawImage(cursor, x, y, 16, 16, null); // cursor.gif is 16x16 size.
                     	         	
                     	ScreenCaptureClient.postScreen(capture,"echindr");
+                    	System.out.println("Screenshot posted");
 
                     	Thread.sleep(VideoRecorderConfiguration.getCaptureInterval());
                     } while (recording);
                 } catch (Exception e) {
 
-                    System.out.println(e.getStackTrace());
+                    System.out.println("In getRecordThread:" +e.getMessage());
                     recording = false;
                 }
             }
@@ -110,9 +126,9 @@ public class VideoRecorder {
     /**
      * It stops the recording and creates the video.
      * @return a {@link String} with the path where the video was created or null if the video couldn't be created.
-     * @throws IOException 
+     * @throws Exception 
      */
-    public static void stop() throws IOException 
+    public static void stop() throws Exception 
     {
         if (recording) 
         {
@@ -127,14 +143,17 @@ public class VideoRecorder {
     /**
      * It starts recording (if it wasn't started before).
      * @param newVideoName with the output of the video.
+     * @throws IOException 
+     * @throws ClientProtocolException 
      */
-    public static void start() {
+    public static void start() throws ClientProtocolException, IOException {
         if (!recording) {
             if (!VideoRecorderConfiguration.getTempDirectory().exists()) {
                 VideoRecorderConfiguration.getTempDirectory().mkdirs();
             }
             calculateScreenshotSize();
             ScreenCaptureClient.init();
+            ScreenCaptureClient.createRoom();
             recording = true;
             currentThread = getRecordThread();
             currentThread.start();

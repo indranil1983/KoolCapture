@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Kool Capture
+Comment=Application to share desktop
+Exec=koolcapture
+Icon=koolcapture.png
+Terminal=false
+Type=Application
+StartupNotify=true

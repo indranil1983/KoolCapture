@@ -26,13 +26,18 @@
  */
 package com.ericsson.broadcast;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -40,6 +45,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.ericsson.multimedia.capture.ScreenCapture;
+import com.ericsson.multimedia.recorder.ShareUrl;
+import com.ericsson.multimedia.recorder.VideoRecorder;
 
 /**
  * Example how to use multipart/form encoded POST request.
@@ -63,6 +70,7 @@ public class ScreenCaptureClient {
 		baos.close();
 		HttpEntity reqEntity = MultipartEntityBuilder.create()
 				.addBinaryBody("screenshot",imageInByte)
+				.addTextBody("roomID", ShareUrl.generateHostName())
 				.build();
 		httppost.setEntity(reqEntity);
 		CloseableHttpResponse response = httpclient.execute(httppost);
@@ -74,8 +82,19 @@ public class ScreenCaptureClient {
 		}
 
 	}
+	
+	public static void createRoom() throws ClientProtocolException, IOException {
+		String createRoomUrl = ShareUrl.generateCreateRoomUrl();
+		HttpGet httpGet = new HttpGet(createRoomUrl);
+		httpclient.execute(httpGet);
+	}
     
-    public static void close() throws IOException {
+    public static void close() throws Exception {
+    	
+    	InputStream stream= VideoRecorder.class.getResourceAsStream("/images/shareend.png");
+    	Image cursor  = ImageIO.read(stream);
+    	ScreenCapture sc = new ScreenCapture((BufferedImage)cursor);
+    	postScreen(sc, ShareUrl.generateHostName());
     	httpclient.close();
     }
 

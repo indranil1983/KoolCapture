@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.github.agomezmoron</groupId>
-	<artifactId>screen-recorder</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<groupId>com.neil</groupId>
+	<artifactId>KoolCapture</artifactId>
+	<version>1.00</version>
 	<packaging>jar</packaging>
 
 	<name>Java screen recorder library</name>
@@ -17,34 +17,9 @@
 		<log4j.version>1.2.17</log4j.version>
 		<jmf.version>2.1.1e</jmf.version>
 	</properties>
-
+	
 
 	<dependencies>
-		<dependency>
-			<groupId>javax.media</groupId>
-			<artifactId>jmf</artifactId>
-			<version>${jmf.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${log4j.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun.jmx</groupId>
-					<artifactId>jmxri</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jdmk</groupId>
-					<artifactId>jmxtools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.jms</groupId>
-					<artifactId>jms</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
 		    <groupId>org.apache.httpcomponents</groupId>
@@ -56,12 +31,15 @@
 		    <groupId>org.apache.httpcomponents</groupId>
 		    <artifactId>httpmime</artifactId>
 		    <version>4.5.3</version>
-		</dependency>
-		
-		
+		</dependency>		
 	</dependencies>
 
 	<build>
+		<resources>
+	     <resource>
+	       <directory>src/resources</directory>
+	     </resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -73,34 +51,58 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<version>0.11</version>
-				<configuration>
-					<message>Maven artifacts for ${project.version}</message>  <!-- git commit message -->
-					<noJekyll>true</noJekyll>                                  <!-- disable webpage processing -->
-					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory> <!-- matches distribution management repository url above -->
-					<branch>refs/heads/mvn-repo</branch>                       <!-- remote branch name -->
-					<includes>
-						<include>**/*</include>
-					</includes>
-					<repositoryName>screen-recorder</repositoryName>      <!-- github repo name -->
-					<repositoryOwner>agomezmoron</repositoryOwner>    <!-- github username -->
-					<server>github</server>
-				</configuration>
-				<executions>
-					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
-						'deploy' phase -->
-					<execution>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<phase>deploy</phase>
-					</execution>
-				</executions>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-dependency-plugin</artifactId>
+			    <executions>
+			        <execution>
+			            <id>copy-dependencies</id>
+			            <phase>prepare-package</phase>
+			            <goals>
+			                <goal>copy-dependencies</goal>
+			            </goals>
+			            <configuration>
+			                <outputDirectory>${project.build.directory}/lib</outputDirectory>
+			                <overWriteReleases>false</overWriteReleases>
+			                <overWriteSnapshots>false</overWriteSnapshots>
+			                <overWriteIfNewer>true</overWriteIfNewer>
+			            </configuration>
+			        </execution>
+			    </executions>
 			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-jar-plugin</artifactId>
+			    <configuration>
+			        <archive>
+			            <manifest>
+			                <addClasspath>true</addClasspath>
+			                <classpathPrefix>lib/</classpathPrefix>
+			                <mainClass>com.ericsson.multimedia.recorder.ScreenCaptureUI</mainClass>
+			            </manifest>
+			        </archive>
+			    </configuration>
+			</plugin>	
+			<plugin>
+		        <artifactId>maven-invoker-plugin</artifactId>
+		        <version>3.1.0</version>
+		        <configuration>
+		          <debug>true</debug>
+		          <projectsDirectory>debianKoolCapture</projectsDirectory>
+		          <preBuildHookScript>packagedeb.bsh</preBuildHookScript>
+		        </configuration>
+		        <executions>
+		          <execution>
+		            <id>package</id>
+		            <goals>
+		              <goal>run</goal>
+		            </goals>
+		          </execution>
+		       </executions>
+		      </plugin>
+			
 		</plugins>
 	</build>
 
+	
 
 </project>

@@ -1,0 +1,2 @@
+#!/bin/bash
+java -jar /usr/share/KoolCapture/KoolCapture-1.00.jar
