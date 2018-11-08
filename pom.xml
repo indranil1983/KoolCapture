@@ -81,25 +81,7 @@
 			            </manifest>
 			        </archive>
 			    </configuration>
-			</plugin>	
-			<plugin>
-		        <artifactId>maven-invoker-plugin</artifactId>
-		        <version>3.1.0</version>
-		        <configuration>
-		          <debug>true</debug>
-		          <projectsDirectory>debianKoolCapture</projectsDirectory>
-		          <preBuildHookScript>packagedeb.bsh</preBuildHookScript>
-		        </configuration>
-		        <executions>
-		          <execution>
-		            <id>package</id>
-		            <goals>
-		              <goal>run</goal>
-		            </goals>
-		          </execution>
-		       </executions>
-		      </plugin>
-			
+			</plugin>			
 		</plugins>
 	</build>
 
